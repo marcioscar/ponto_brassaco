@@ -9,10 +9,11 @@ st.logo('logo brassaco.png', icon_image='logo brassaco.png')
 
 
 def pagina_funcionario():
+    
     usuario = st.session_state['usuario']
     usuario['_id'] = str(usuario['_id'])
     df = pd.DataFrame([usuario])
-
+    
     def logout():
         st.session_state['usuario'] = None
         st.session_state['logado'] = False
@@ -20,7 +21,6 @@ def pagina_funcionario():
             st.session_state['senha'] = ''
         st.session_state.clear()
         st.rerun()
-    
     # Check if 'ponto' exists and is not empty
     if 'ponto' in df and not df['ponto'].iloc[0] == []:
         pontos = df['ponto'].iloc[0]
@@ -184,13 +184,7 @@ def pagina_funcionario():
     st.dataframe(df_pivot[['data','entrada', 'almoco', 'volta_almoco', 'saida', 'Horas do Dia', 'Total de Horas']])
     # df_container.dataframe(st.session_state.df)            
                 
-    def logout():
-        st.session_state['usuario'] = None
-        st.session_state['logado'] = False
-        if 'senha' in st.session_state:
-            st.session_state['senha'] = ''
-        st.session_state.clear()
-        st.rerun()
+    
        
     # st.dataframe(df_pivot[['data','entrada', 'almoco', 'volta_almoco', 'saida', 'horas_trabalhadas']])
     
