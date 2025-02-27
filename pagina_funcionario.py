@@ -3,16 +3,23 @@ import streamlit as st
 import pandas as pd
 from bson import ObjectId
 
-from crud import ler_usuarios, registrar
+from crud import ler_usuarios, registrar, trocar_senha
 
 st.logo('logo brassaco.png', icon_image='logo brassaco.png')
 
 
 def pagina_funcionario():
-    
     usuario = st.session_state['usuario']
     usuario['_id'] = str(usuario['_id'])
     df = pd.DataFrame([usuario])
+
+    def logout():
+        st.session_state['usuario'] = None
+        st.session_state['logado'] = False
+        if 'senha' in st.session_state:
+            st.session_state['senha'] = ''
+        st.session_state.clear()
+        st.rerun()
     
     # Check if 'ponto' exists and is not empty
     if 'ponto' in df and not df['ponto'].iloc[0] == []:
@@ -158,6 +165,15 @@ def pagina_funcionario():
       minutes = total_minutes % 60
       return f"{hours}h {minutes}m"
     
+    with st.sidebar.expander('Trocar Senha'):  
+        senha = st.text_input('Nova Senha')
+        if st.button('Trocar'):
+            id = usuario['_id']
+            trocar_senha(id, senha)
+            logout()
+             
+
+
     df_pivot['Total de Horas'] = df_pivot['accumulated_minutes'].apply(to_time_str)
     
     st.sidebar.write('# Total de Horas ')  
@@ -177,6 +193,18 @@ def pagina_funcionario():
         st.rerun()
        
     # st.dataframe(df_pivot[['data','entrada', 'almoco', 'volta_almoco', 'saida', 'horas_trabalhadas']])
+    
+    
+     
+   
+
+  
+
+
+
+    # if st.sidebar.button("Trocar a senha"):
+        # trocar()
+
     if st.sidebar.button('Sair', type="primary"):
         logout()
 

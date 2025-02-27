@@ -98,6 +98,13 @@ def apagar_usuario(id):
     filtro = {"_id": ObjectId(id)}
     user.delete_one(filtro)
 
+def trocar_senha(id, senha):
+    db = client["brassaco"]
+    user = db["funcionarios"]
+
+    filtro = {"_id": ObjectId(id)}
+    atualizacao = {"$set": {"password": define_senha(senha)}}
+    user.update_one(filtro, atualizacao)
 
 # registrar('67b86d93dd21965649fb3455', 'volta_almoco')    
 # criar_usuario('Teste', 'marcio@gmail.com', 'teste', 'QI') 
