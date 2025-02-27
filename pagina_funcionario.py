@@ -115,13 +115,11 @@ def pagina_funcionario():
     
     df_pivot['Horas do Dia'] = df_pivot.apply(calcular_horas_trabalhadas, axis=1)
     
-
      # Formatar as colunas de hora para exibir apenas as horas
     for col in ['entrada', 'almoco', 'volta_almoco', 'saida']:
         df_pivot[col] = df_pivot[col].apply(lambda x: x.strftime('%H:%M:%S') if x != '00:00:00' else '00:00:00')
     
     df_pivot['data'] = pd.to_datetime(df_pivot['data']).dt.strftime('%d/%m/%Y')
-
     
     # st.write(df_pivot.columns)
     st.sidebar.markdown(f'Registrar ponto para **{usuario['nome']}**')

@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from bson import ObjectId
+from time import sleep
+from datetime import datetime
 
 from crud import alterar_usuario, apagar_usuario, criar_usuario 
 
@@ -8,6 +10,15 @@ st.logo('logo brassaco.png', icon_image='logo brassaco.png')
  
 
 def pagina_gestao():
+
+    def logout():
+        st.session_state['usuario'] = None
+        st.session_state['logado'] = False
+        if 'senha' in st.session_state:
+            st.session_state['senha'] = ''
+        st.session_state.clear()
+        st.rerun()
+        
     usuarios = st.session_state['usuarios']
     df_todos = pd.DataFrame.from_dict(usuarios, orient="index")
     
@@ -25,20 +36,35 @@ def pagina_gestao():
     pontos = df_filtrado['ponto'].iloc[0]
     df_pontos = pd.DataFrame(pontos)
 
+
+    selected_month = st.selectbox(
+        "Selecione o Mês",
+        range(1, 13),
+        index=datetime.now().month - 1,
+    )
+
+
+    df_pontos_filtered = df_pontos[df_pontos['registro'].dt.month == selected_month]
+
     
     # Criar uma coluna 'data' apenas com a data
-    df_pontos['data'] = df_pontos['registro'].dt.date
+    df_pontos_filtered['data'] = df_pontos_filtered['registro'].dt.date
     
     # Criar uma coluna 'hora' apenas com a hora
-    df_pontos['hora'] = df_pontos['registro']
+    df_pontos_filtered['hora'] = df_pontos_filtered['registro']
     
     # Pivotar o DataFrame para ter datas como linhas e tipos como colunas
-    df_pivot = df_pontos.pivot_table(index='data', columns='tipo', values='hora', aggfunc='first')
+    df_pivot = df_pontos_filtered.pivot_table(index='data', columns='tipo', values='hora', aggfunc='first')
     
 
     df_pivot.reset_index(inplace=True)
      # Preencher valores ausentes com '00:00:00'
     df_pivot = df_pivot.fillna('00:00:00')
+
+    if df_pontos_filtered.empty:
+        st.info('Ainda Não há Registros para esse mês', icon="ℹ️")
+        sleep(4)
+        logout()
 
 
     # Calcular a quantidade de horas trabalhadas
