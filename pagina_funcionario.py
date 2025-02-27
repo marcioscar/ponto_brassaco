@@ -2,17 +2,19 @@ from datetime import datetime
 import streamlit as st
 import pandas as pd
 from bson import ObjectId
-
+from time import sleep
 from crud import ler_usuarios, registrar, trocar_senha
 
 st.logo('logo brassaco.png', icon_image='logo brassaco.png')
 
+selected_month = 1
 
 def pagina_funcionario():
     
     usuario = st.session_state['usuario']
     usuario['_id'] = str(usuario['_id'])
     df = pd.DataFrame([usuario])
+    
     
     def logout():
         st.session_state['usuario'] = None
@@ -39,24 +41,46 @@ def pagina_funcionario():
     
     # Extrair os pontos e criar um DataFrame separado
     pontos = df['ponto'].iloc[0]
+    
     df_pontos = pd.DataFrame(pontos)
 
+    selected_month = st.selectbox(
+        "Selecione o Mês",
+        range(1, 13),
+        index=datetime.now().month - 1,
+    )
+
+
+    df_pontos_filtered = df_pontos[df_pontos['registro'].dt.month == selected_month]
+
     # Criar uma coluna 'data' apenas com a data
-    df_pontos['data'] = df_pontos['registro'].dt.date
+    df_pontos_filtered['data'] = df_pontos_filtered['registro'].dt.date
     
     # Criar uma coluna 'hora' apenas com a hora
-    df_pontos['hora'] = df_pontos['registro']
+    df_pontos_filtered['hora'] = df_pontos_filtered['registro']
     
     # Pivotar o DataFrame para ter datas como linhas e tipos como colunas
-    df_pivot = df_pontos.pivot_table(index='data', columns='tipo', values='hora', aggfunc='first')
+    df_pivot = df_pontos_filtered.pivot_table(index='data', columns='tipo', values='hora', aggfunc='first')
     
+    # st.write(df_pontos['data'])
+    
+   
+    df_pontos_filtered['data'] = df_pontos_filtered['registro'].dt.date
+    
+    
+
 
     df_pivot.reset_index(inplace=True)
     
      # Preencher valores ausentes com '00:00:00'
     df_pivot = df_pivot.fillna('00:00:00')
 
-    
+    if df_pontos_filtered.empty:
+        st.info('Ainda Não há Registros para esse mês', icon="ℹ️")
+        sleep(4)
+        logout()
+        
+
 
     # Calcular a quantidade de horas trabalhadas
     def calcular_horas_trabalhadas(row):
@@ -66,19 +90,17 @@ def pagina_funcionario():
         else:    
             horas_manha = (row['almoco'] - row['entrada']).total_seconds() / 3600
         
-        if not 'saida' in df_pivot.columns :
-            horas_tarde = 0
-            df_pivot['saida'] = '00:00:00'
         
         if not 'volta_almoco' in df_pivot.columns:
             horas_tarde = 0
             df_pivot['volta_almoco'] = '00:00:00'
+
+        if not 'saida' in df_pivot.columns :
+            horas_tarde = 0
+            df_pivot['saida'] = '00:00:00'    
             
         else:    
             horas_tarde = (row['saida'] - row['volta_almoco']).total_seconds() / 3600
-        # horas_manha = (row['almoco'] - row['entrada']).total_seconds() / 3600
-        
-        # horas_tarde = (row['saida'] - row['volta_almoco']).total_seconds() / 3600
         
         if horas_manha < 0:
             horas_manha = 0
@@ -93,8 +115,6 @@ def pagina_funcionario():
     
     df_pivot['Horas do Dia'] = df_pivot.apply(calcular_horas_trabalhadas, axis=1)
     
-    
-
 
      # Formatar as colunas de hora para exibir apenas as horas
     for col in ['entrada', 'almoco', 'volta_almoco', 'saida']:
@@ -106,7 +126,7 @@ def pagina_funcionario():
     # st.write(df_pivot.columns)
     st.sidebar.markdown(f'Registrar ponto para **{usuario['nome']}**')
     data_hoje = datetime.today().strftime('%d/%m/%Y')
-
+    
     
 
     # if df_pivot['data'].iloc[-1] == data_hoje:
@@ -176,6 +196,10 @@ def pagina_funcionario():
 
     df_pivot['Total de Horas'] = df_pivot['accumulated_minutes'].apply(to_time_str)
     
+
+   
+
+
     st.sidebar.write('# Total de Horas ')  
     st.sidebar.write(f'## {df_pivot['Total de Horas'].iloc[-1]}')
     
