@@ -7,6 +7,8 @@ from pagina_funcionario import pagina_funcionario
 st.logo('logo brassaco.png', icon_image='logo brassaco.png')
 usuarios = ler_usuarios()
 usuarios = {usuario["nome"]: usuario for usuario in usuarios}
+if 'senha' not in st.session_state:
+    st.session_state['senha'] = ''
 
 st.session_state['usuarios'] = usuarios
 
@@ -17,18 +19,17 @@ def login():
             usuarios.keys(), key=23232, index= None, placeholder="Selecione o Nome",
 
             )
-        
         if nome_usuario is not None:
             usuario = usuarios[nome_usuario]    
         
-        senha = st.text_input('Digite sua senha', type='password', key="senha")
+        senha = st.text_input("Senha", type="password", key='senha', autocomplete="off")
         if st.button('Acessar'):
             usuario = usuarios[nome_usuario]
             if  verifica_senha( usuario['password'], senha):
                 st.success('Login efetuado com sucesso')
                 st.session_state['logado'] = True
                 st.session_state['usuario'] = usuario
-                st.session_state.senha = ''
+                
                 # sleep(1)
                 st.rerun()
             else:
@@ -42,6 +43,7 @@ def pagina_principal():
         pagina_gestao()
         st.rerun()
     else:
+        st.session_state.senha = ''
         pagina_funcionario()
         st.rerun()
      

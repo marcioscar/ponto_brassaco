@@ -163,7 +163,17 @@ def pagina_gestao():
                     st.toast('Apagado com Sucesso', icon='🗑️')
                     st.rerun()
                     
-        
+    
+    def logout():
+        st.session_state['usuario'] = None
+        st.session_state['logado'] = False
+        if 'senha' in st.session_state:
+            st.session_state['senha'] = ''
+        st.session_state.clear()
+        st.rerun()
+       
+    if st.sidebar.button('Sair', type="primary"):
+        logout()
                 
 
                 

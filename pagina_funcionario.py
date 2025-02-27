@@ -117,7 +117,7 @@ def pagina_funcionario():
             registrar(usuario['_id'], tipo)
             st.session_state.senha = ''
             st.session_state.clear()
-            st.rerun()
+            
             
             
     elif df_pivot['entrada'].iloc[-1] != '00:00:00' and df_pivot['almoco'].iloc[-1] != '00:00:00' and df_pivot['volta_almoco'].iloc[-1] == '00:00:00':
@@ -169,11 +169,12 @@ def pagina_funcionario():
     # df_container.dataframe(st.session_state.df)            
                 
     def logout():
-        # st.session_state['usuario'] = None
-        # st.session_state['logado'] = False
-        # st.session_state.senha = ''
+        st.session_state['usuario'] = None
+        st.session_state['logado'] = False
+        if 'senha' in st.session_state:
+            st.session_state['senha'] = ''
         st.session_state.clear()
-        # st.rerun()
+        st.rerun()
        
     # st.dataframe(df_pivot[['data','entrada', 'almoco', 'volta_almoco', 'saida', 'horas_trabalhadas']])
     if st.sidebar.button('Sair', type="primary"):
