@@ -8,9 +8,7 @@ from crud import alterar_usuario, apagar_usuario, criar_usuario
 
 st.logo('logo brassaco.png', icon_image='logo brassaco.png')
  
-
 def pagina_gestao():
-
     def logout():
         st.session_state['usuario'] = None
         st.session_state['logado'] = False

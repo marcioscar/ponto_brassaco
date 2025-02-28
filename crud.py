@@ -5,7 +5,9 @@ import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
-from datetime import datetime, time, date
+
+from datetime import datetime, timezone, timedelta, time
+
 
 
 try:
@@ -35,13 +37,7 @@ def ler_usuarios():
     # Buscar todos os documentos
     result = user.find()
     return list(result)
-    # Retornar lista de documentos
-    # Converter os documentos para dicionários
-    # usuarios = []
-    # for doc in result:
-    #     doc["_id"] = str(doc["_id"])  # Converter ObjectId para string
-    #     usuarios.append(doc)
-    # return usuarios
+    
 
 
 def criar_usuario(nome, email, senha, loja, adm=False):   
@@ -65,10 +61,16 @@ def registrar(id, tipo):
     db = client["brassaco"]
     collection = db["funcionarios"]
     filter = {"_id": ObjectId(id)}
+    tz = timezone(timedelta(hours=-3))  # Brasília Time (UTC-3)
+    current_time_tz = datetime.now(tz)
+    
+    
+
+
     update_data = {
     "$push": {
         "ponto": {  # Campo que contém o array
-        "registro": datetime.now(),
+        "registro": current_time_tz,
         "tipo": tipo,
         }    
             }   
