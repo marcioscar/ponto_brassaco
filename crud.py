@@ -61,16 +61,18 @@ def registrar(id, tipo):
     db = client["brassaco"]
     collection = db["funcionarios"]
     filter = {"_id": ObjectId(id)}
-    tz = timezone(timedelta(hours=-3))  # Brasília Time (UTC-3)
-    current_time_tz = datetime.now(tz)
-    
-    
+    # tz = timezone(timedelta(hours=-3))  # Brasília Time (UTC-3)
+    # three_hours_ago_tz = current_time_tz - timedelta(hours=3)
 
+    # current_time_tz = datetime.now(tz)
+    # print(three_hours_ago_tz)
+    now = datetime.now()
+    three_hours_ago = now.replace(hour=now.hour - 3)
 
     update_data = {
     "$push": {
         "ponto": {  # Campo que contém o array
-        "registro": current_time_tz,
+        "registro": three_hours_ago,
         "tipo": tipo,
         }    
             }   
