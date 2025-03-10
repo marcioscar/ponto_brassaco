@@ -74,11 +74,11 @@ def pagina_funcionario():
     
      # Preencher valores ausentes com '00:00:00'
     df_pivot = df_pivot.fillna('00:00:00')
-
-    if df_pontos_filtered.empty:
-        st.info('Ainda Não há Registros para esse mês', icon="ℹ️")
-        sleep(4)
-        logout()
+    
+    # if df_pontos_filtered.empty:
+    #     st.info('Ainda Não há Registros para esse mês', icon="ℹ️")
+    #     sleep(4)
+    #     logout()
         
 
 
@@ -89,7 +89,6 @@ def pagina_funcionario():
             df_pivot['almoco'] = '00:00:00'   
         else:    
             horas_manha = (row['almoco'] - row['entrada']).total_seconds() / 3600
-        
         
         if not 'volta_almoco' in df_pivot.columns:
             horas_tarde = 0
@@ -113,8 +112,20 @@ def pagina_funcionario():
         
         return f'{horas}h {minutos}m' 
     
+    
     df_pivot['Horas do Dia'] = df_pivot.apply(calcular_horas_trabalhadas, axis=1)
     
+    # começar daqui
+    if df_pivot.empty:
+        if st.sidebar.button('Entrada'):
+            tipo = 'entrada'
+            registrar(usuario['_id'], tipo)
+            st.session_state.senha = ''
+            st.session_state.clear()
+            st.rerun()
+        return        
+            
+
      # Formatar as colunas de hora para exibir apenas as horas
     for col in ['entrada', 'almoco', 'volta_almoco', 'saida']:
         df_pivot[col] = df_pivot[col].apply(lambda x: x.strftime('%H:%M:%S') if x != '00:00:00' else '00:00:00')
